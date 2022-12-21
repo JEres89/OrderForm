@@ -1,0 +1,240 @@
+{
+	"ConfigurationVersion": "FileName-timestamp", // No spaces
+	"FormConfig": [ // All sections must be here [ { config },{ config2 } ]
+		{ // Section start
+
+			// Id within this form, does not affect functionality, but should stay the same between configuration versions to ensure backwards compatibility
+			"Id": 0,
+			// Id: 0 must be the "General" section
+			"Name": "General",
+
+			"Fields": [
+				// Field start
+				{ // R = Required, O = Optional. Uncommented values are the defaults, values in comments are alternative values or the required format
+
+					// R Field type, 0 - 15
+					"InputType": 0,
+
+					// O Internal name used to reference this field in dependencies for other fields ('Singleton' providers are set here)
+					"AccessName": null, // "Unique",
+
+					// R The name the user will see, should be short and descriptive
+					"DisplayName": "", // "Name of field",
+
+					// O Longer description of the field. If text starts with '!' it will be displayed as a warning. 
+					// Can contain regular html hyperlinks <a target=\"\" href=\"https://link.com\">Link text</a> (and other html markup)
+					"Description": null, // "Description",
+
+					// O Text displayed when input field is empty
+					"Placeholder": null, // "Text",
+
+					// O Whether this field must have a valid non-empty input value, false is default
+					"Required": false, // true,
+
+					// O Whether this fields value should be displayed in the form summary, false is default
+					"AsSummary": false, // true,
+
+					// O Custom constraints, entered in pairs of strings ( text surrounded by "" ), see the FieldTypes file for which constraints can be applied to which fields
+					"Constraints": null /* {
+            "Identifier": "CAT01/CAT02", // See below for constraint syntax
+            "Identifier2": "Value2"
+          }*/
+				}, // Field end, end with ',' if there are more fields in the section
+				{
+					"InputType": 0, //-15,
+					"AccessName": null, // "",
+					"DisplayName": "",
+					"Description": null, // "",
+					"Placeholder": null, // "",
+					"Required": false, // true,
+					"AsSummary": false, // true,
+					"Constraints": null /* {
+            "": "",
+            "": ""
+          }*/
+				}
+			]
+		}, // Section end, end with ',' if there are more sections in the form
+		{
+			"Id": 0,
+			"Name": "",
+			"Fields": [
+				{
+					"InputType": 0, //-15,
+					"AccessName": null, // "",
+					"DisplayName": "",
+					"Description": null, // "",
+					"Placeholder": null, // "",
+					"Required": false, // true,
+					"AsSummary": false, // true,
+					"Constraints": null /* {
+            "": "",
+            "": ""
+          }*/
+				}
+			]
+		}
+	]
+}
+
+/*
+	
+	Constraints applicable to all fields: 
+			"@DEP_CONDITION@" = "CAT01,CAT02/DISC:-1000" - Conditions for the field to be enabled
+				-	"CAT01,CAT02" - Names separated by comma, ALL needs to have valid non-empty input
+				-	"CAT01/CAT02" - Names separated by slash, ANY of the fields must have a valid input
+							Slash and comma can be combined, but slash is checked after comma,
+							 so "CAT01/CAT03,CAT02" means that "CAT02" must allways valid, and either "CAT01" and/or "CAT03" must be
+							 valid
+				-	"@INVOICE_CURRENCY@:SEK" - Name and value separated by colon, field must have that specific value
+							Colon can be added after any field name so "@INVOICE_PERIOD@:Monthly,@INVOICE_CURRENCY@:SEK"
+							 means that period has to be Monthly AND currency has to be SEK
+							Colon is checked last so "@INVOICE_CURRENCY@:SEK/EUR" would not work, EUR would be interpreted
+							 as an AccessName.
+			"@DEP_VALID@" = "CAT01,CAT02" - Fields REQUIRED to have non-empty valid input, no modifiers (/:) here yet.
+																	This requirement is shown at the referenced field
+		
+		OBS!: "@TRUE_STRING@" and "@FALSE_STRING@" must be written just so (capitalized and in citation) when used in Constraints
+					since they are parsed as strings.
+					But as true and false when set to values.
+	
+
+	Field types
+		Number = 0
+		Price = 1
+		Text = 2
+		Multiline = 3
+		Boolean = 4
+		Date = 5
+		Duration = 6
+		Phone = 7
+		Email = 8
+		Address = 9
+		Url = 10
+		Choice = 11
+		Person = 12
+		Product = 13
+		Info = 14
+		Sum = 15
+
+		
+		Number = 0
+			Quantity, always positive, no decimals.
+
+
+		Price = 1
+			Currency, currently no decimal places. 
+			Constraints:
+				-	"@INVOICE_CURRENCY@" = "True"/"False"/"{AccessName}" (False)
+				-	"Negative" = "True"/"False" (False) - Sets the field to only hold negative values (for discount fields)
+				-	"@PRODUCT_GROUP@" = "Licenses" - groups total costs of products together in summary
+
+
+		Text = 2,
+			Single line arbitrary text, anything goes.
+
+
+		Multiline = 3,
+			Resizable field of arbitrary text, anything goes.
+
+
+		Boolean = 4,
+			Checkbox, always has a value, unchecked = false, checked = true.
+
+
+		Date = 5,
+			Single date selector.
+			Constraints:
+				-	"Span" = "355"/"?355" - Sets the time in days between this and the other Date field. Setting this 
+																	value also Requires a DEP_CONDITION constraint referencing another Date field
+							'?' - If present it is not enforced, only added as initial value
+
+
+		Duration = 6,
+			Double date selector, defining a period of time.
+			Constraints:
+				-	"Span" = "355"/"?355" - Sets the time in days between the start and end date.
+							'?' - If present it is not enforced, only added as initial value
+
+
+		Phone = 7,
+			Phone number formatted text string, prevents any input that is not a valid phone number.
+
+
+		Email = 8,
+			Email address formatted text string, prevents any input that is not a valid email address.
+
+
+		Address = 9,
+			A composite field which combines a few fields into a single address value, a drop-down list 
+			to select country/region and three text fields for street, city and postal code respectively.
+
+			Constraints:
+				-	"@ORDER_COUNTRY@" = "True"/"False"/"This" (False) - Source of address country
+							"True" - Use the orders globally set country, i.e the customers country of operation
+							"False" - (default) Use a specific country for this field only
+							"@THIS_STRING@" - Set this field to be the source of said global country
+				-	"FullAddress" = "True"/"False" (True) - Whether field is a complete street address, or only a country
+
+
+		Url = 10,
+			Internet URL formatted text string, prevents any input that is not a valid URL
+
+	
+		Choice = 11,
+			An element with a number of choices:
+				-	Radio buttons for single selection from less than 5 choices,
+				-	Checkboxes for multiple selection from less than 5 choices,
+				-	Dropdown list for single or multiple selections from 5 or more choices
+		
+			Constraints:
+				-	"Choices" = "One,Two,Three"/"DB:Table" - Choices separated by comma, or a collection with source 
+																								 and name separated by colon "SOURCE:SetName"
+							"EXL:*" for tables stored in the Excel file
+				-	"Multiple" = "#" (1) - Max number of choices 1+
+				-	"@DEFAULT@" = "0,4,5" - Choice number(s) selected by default
+
+	
+		Person = 12,
+			A composite field which combines up to 7 fields into one value describing a person.
+			Constraints:
+				-	"RequiredFlags" = "yyyyyyyy"/"nnnnnnnn" : Which personal fields are required
+							index (position in text), (default), Value
+							i = 0 (y) : First name
+							i = 1 (y) : Last name
+							i = 2 (n) : Birthdate
+							i = 3 (y) : Phone number
+							i = 4 (y) : Email address
+							i = 5 (n) : Work address
+							i = 6 (n) : Home address
+							i =  () :
+	
+
+		Product = 13,
+			A composite field listing products in the specified category loaded from the product list.
+			Constraints:
+				-	"Category" = "CAT01" - Restrict which product category to display
+				-	"@PRODUCT_GROUP@" = "Licenses" - Groups total costs of products together in summary
+
+
+		Info = 14,
+			A field only for displaying information, some formatting and controlling validation for groups of fields.
+			If an info field is added to a section, all fields between that and the next Info field are included in the group.
+			Inserting an empty Info field (nothing but the FieldType value set) ends any previous group, but does not create its own.
+			Values in config:
+					DisplayName - A subheading for the set
+					Required - Sets all group fields to be required
+					Constraints - Sets condition for entire group ( better performance than if all fields share a condition and each one 
+												checks it individually )
+			Constraints:
+					"@DEP_CONDITION@" - conditions for when the group will be enabled
+					"@DEP_VALID@" - ( Not implemented )
+
+
+		Sum = 15,
+			A currency sum field only for displaying the periodic subtotal of referred fields
+			Constraints:
+					"@DEP_CONDITION@" = "CAT01/CAT02/..." - Displays the sum of the numeric values of all valid fields, 
+																							AccessNames separated by slash
+
+*/

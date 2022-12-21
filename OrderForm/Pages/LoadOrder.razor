@@ -1,0 +1,91 @@
+﻿@page "/loadorder"
+@inject ActiveOrderTracker ActiveOrder
+
+<div>
+	<h2>Load</h2>
+	@for (int i = 0; i < values.Length; i++) {
+		<div>
+			<h4>@stateDesc[i]</h4>
+			@foreach (var order in values[i]) {
+				if (order.inUse) {
+					var id = order.id;
+					var index = i;
+					if (ActiveOrder.ActiveModel?.orderId == id) {
+						<span class="fileLink form-control">
+							<i class="fileIcon bi bi-arrow-right-circle-fill" aria-hidden="true"></i>
+							<NavLink class="nav-link d-inline-block text-success" href=@("orderform/"+order.id) title="@((MarkupString)order.info.desc)">
+								@order.info.name (Open, return to view)
+							</NavLink>
+							<span class="fileAction" @onclick=@(() => CloseOrder(id, index))>
+								<i class=" bi bi-stop-circle-fill" title="This will NOT save unsaved changes"></i>Close
+							</span>
+						</span>
+					}
+					else {
+						<span class="fileLink form-control">
+							<i class="fileIcon bi bi-person-slash" aria-hidden="true"></i>
+							<NavLink class="nav-link d-inline-block text-danger" title="@((MarkupString)order.info.desc)">
+								@order.info.name
+							</NavLink>
+							<span class="fileAction" @onclick=@(() => RefreshOrder(id, index))>
+								<i class=" bi bi-arrow-clockwise" title="File is being viewed by someone else, click to refresh"></i>In use
+							</span>
+						</span>
+					}
+				}
+				else {
+					<span class="fileLink form-control">
+						<i class="fileIcon bi bi-file-earmark-text" aria-hidden="true"></i>
+						<NavLink class="nav-link d-inline-block text-primary" href=@("orderform/"+order.id) title="@((MarkupString)order.info.desc)">
+							@order.info.name
+						</NavLink>
+					</span>
+				}
+				<br />
+			}
+		</div>
+		<br />
+	}
+</div>
+
+<dialog id="loadSpinner">
+	<h3>Loading order...</h3>
+
+</dialog>
+@code {
+	//private const int openOrderInfoIndex = 0;
+	//private const int reviewingOrderInfoIndex = 1;
+	//private const int approvedOrderInfoIndex = 2;
+	//private const int actionedOrderInfoIndex = 3;
+	private List<(int id, (string name, string desc) info, bool inUse)>[] values = new List<(int id, (string name, string desc) info, bool inUse)>[]{new(), new(), new(), new()};
+
+	private static string[] stateDesc = { "Open orders", "Orders under review", "Approved orders", "Orders entered into Fortnox" };
+
+	protected override void OnInitialized() {
+		base.OnInitialized();
+		var props = OrderFileManager.GetOrderInfo();
+		foreach (var order in props) {
+			var stringified = (order.id, (
+				name: order.props.orderName!, desc: $"Id: {order.props.orderId} \nFor: {order.props.customerName} \nDate: {order.props.orderDate?.ToShortDateString()} \nCurrency: {order.props.invoiceCurrency} \nPlan: {order.props.invoicePlan} "), order.inUse);
+			values[order.props.orderState].Add(stringified);
+		}
+	}
+
+	private void RefreshOrder(int id, int orderState) {
+		if (!OrderFileManager.OrderInUse(id)) {
+			for (int i = 0; i < values[orderState].Count; i++) {
+				var item = values[orderState][i];
+				if (item.id == id) {
+					item.inUse = false;
+					values[orderState][i] = item;
+					break;
+				}
+			}
+			StateHasChanged();
+		}
+	}
+	private void CloseOrder(int id, int orderState) {
+		ActiveOrder.DiscardOrder();
+		RefreshOrder(id, orderState);
+	}
+}

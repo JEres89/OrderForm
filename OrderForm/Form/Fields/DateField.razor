@@ -1,0 +1,30 @@
+﻿@inherits FieldComponent<DateRange>
+@using static OrderForm.Data.FieldOptionStrings
+@using BlazorDateRangePicker
+@using System.Globalization
+
+@if (_condValid) {
+	<div class="fieldComponent dateField">
+		<span class=@Css_fieldRow>
+			@{
+				bool hasDescription = Config.Description != null && !Config.Description.StartsWith('!');
+			}
+
+			<FieldLabel HtmlId=@HtmlId DisplayName=@DisplayName HasDescription=@hasDescription />
+			@if (Model.IsReadOnly) {
+				@*<span class=@Css_fieldInput id="@HtmlId">@StartDate?.Date.ToShortDateString() @(_isSingleDate ? "" : " - " + EndDate?.Date.ToShortDateString())</span>*@
+				<span class=@Css_fieldInput id="@HtmlId">@StartDate?.Date.ToString(Placeholder) @(_isSingleDate ? "" : " - " + EndDate?.Date.ToString(Placeholder))</span>
+			}
+			else if (_depValid) {
+				<DateRangePicker class=@Css_fieldInput MinSpan="_span" ShowWeekNumbers="true" SingleDatePicker="_isSingleDate" Id="@HtmlId" name="@(AccessName??DisplayName)" OnRangeSelect="(range) => CurrentValue = range" @bind-StartDate="@StartDate" EndDate="@EndDate" MinDate="@MinDate" MaxDate="@MaxDate" DateFormat="@Placeholder"/>
+			}
+		</span>
+		@if (!Model.IsReadOnly) {
+			<ValidationMessage For="ValueExpression" />
+		}
+
+		@if (Config.Description != null) {
+			<FieldDescription HtmlId=@HtmlId Description=@Config.Description HasDescription=@hasDescription />
+		}
+	</div>
+}

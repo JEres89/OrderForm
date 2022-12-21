@@ -1,0 +1,166 @@
+﻿@page "/orderform"
+@page "/orderform/{OrderIdString?}"
+@using static OrderForm.Data.FieldOptionStrings
+
+@if (formReady) {
+	<EditForm EditContext="@orderContext">
+		<div class=@Css_formRow>
+			<div id="formContainer" class=@Css_form>
+				<div class="pe-2 justify-content-between ">
+					<span class="row justify-content-between ">
+						<h2 class="col m-0 pe-1" id="formName">@(model!.OrderName ?? "New Order")</h2>
+						@if (model.orderState < 2) {
+							<button type="button" class="col-2 btn btn-primary m-0 p-0 " @onclick=SaveOrder>Save form</button>
+						}
+					</span>
+					<span id="change_formName" class="flex-grow-0 flex-shrink-0 ">
+						<i id="icon_formName" class="bi bi-pencil-square" onclick="ToggleThisAndTarget(this, 'edit_formName')"></i>
+						<input id="edit_formName" type="text" placeholder="Order name" style="display:none" @bind-value=@(model.OrderName) onblur="ToggleThisAndTarget(this, 'icon_formName', false)" />
+					</span>
+				</div>
+
+				<div id="sectionContainer" class="row border border-top">
+					@foreach (var item in sectionChoices) {
+						if (model.IsReadOnly && !activeSections.Contains(item.Key)) {
+							continue;
+						}
+						<SectionComponent SectionId="@item.Key" Name="@item.Value" Model="@model" Form="this" Active="@activeSections.Contains(item.Key)" />
+					}
+				</div>
+			</div>
+			@{ // ToDo: move comments to separate component
+				var comments = model.GetComments();
+				if (comments.Count > 0 || model.orderState == FormModel.ORDER_REVIEW) {
+					<div id="commentColumn" class="aside ps-2 pe-1">
+						@if (model.orderState == FormModel.ORDER_REVIEW) {
+							<span>Write comment&nbsp;<i class="bi bi-pencil-square" onclick="ToggleDisplay('newComment')"></i></span>
+							<form id="newComment" style="display:none" @onsubmit=@AddComment>
+								<label id="commentLabel" class="p-0 m-0">
+									<input type="text" placeholder="Your name" @bind=commentAuthor />
+									<textarea title="Comment text" rows="2" cols="30" @bind=newComment />
+									<button class="btn-sm, btn-secondary " type="submit" @onclick=AddComment>Add comment</button>
+								</label>
+							</form>
+							<br />
+						}
+						@if (comments.Count > 0) {
+							<h5>Review comments</h5>
+							@foreach (var comment in comments) {
+								string key = comment.Key;
+								bool revised = comment.Value.revised;
+								<div class=@("reviewComment " + (revised ? "border-success" : "border-dark"))>
+									@if (model.orderState == FormModel.ORDER_IN_PROGRESS) {
+										<h6>
+											@comment.Key &nbsp;<i class=@("bi bi-clipboard-check" + (revised ? "-fill text-success" : " text-dark")) @onclick="() => ToggleRevisedComment(key)" title="Mark as revised"></i>
+										</h6>
+										<div>@((MarkupString)comment.Value.text)</div>
+									}
+									else {
+										<h6>
+											@comment.Key &nbsp; <i class="iconButton bi bi-trash3" @onclick=@(() => DeleteComment(key))></i>
+										</h6>
+										<div>@((MarkupString)comment.Value.text)</div>
+										@if (revised) {
+											<span id=@($"comment_{key}_remark")>
+												<span onclick="ToggleChildren(this.parentElement)">
+													<i class="iconButton bi bi-pencil-square text-success" title="Add remark" ></i>
+												</span>
+												<form class="w-100" style="display:none" @onsubmit=@(() => RemarkComment(key))>
+													<input class="fst-italic col-10" type="text" placeholder="Your name" @bind=newComment /><button type="submit" class="iconButton bi bi-pencil-square" title="Add remark" @onclick=@(() => RemarkComment(key))></button>
+												</form>
+											</span>
+										}
+									}
+								</div>
+							}
+						}
+					</div>
+				}
+			}
+			@* ToDo?: move state buttons to separate component? *@
+			<div id="summaryColumn" class="aside ps-2">
+				@switch (model.orderState) {
+					case FormModel.ORDER_IN_PROGRESS:
+						<h3>Order in progress</h3>
+						<div id="stateChangeButtons">
+							<button type="button" class="btn btn-primary m-0 " @onclick=SendToReview disabled="@disableStateButton">
+								Verify and send to review
+							</button>
+							<i id="stateSpinner1" class="spinnerSmall" style="display:none"></i>
+						</div>
+						if (validationError != null) {
+							<p class="validation-message">@validationError</p>
+						}
+						<br />
+						break;
+					case FormModel.ORDER_REVIEW:
+						<h3>Order under review</h3>
+						<div id="stateChangeButtons">
+							<button type="button" class="btn btn-primary m-0 " @onclick=ReturnForRevision disabled="@disableStateButton">
+								Return order for revision
+							</button><span id="stateSpinner1" class="spinnerSmall" style="display:none"></span>
+							<br />
+							<button type="button" class="btn btn-primary m-0 " @onclick=ApproveOrder disabled="@disableStateButton">
+								Approve and lock order
+							</button><span id="stateSpinner2" class="spinnerSmall" style="display:none"></span>
+						</div>
+						<br />
+						break;
+					case FormModel.ORDER_APPROVED:
+						<h3>Order approved</h3>
+						<div id="stateChangeButtons">
+							<button type="button" class="btn btn-primary m-0 " @onclick=RetractOrder disabled="@disableStateButton">
+								Retract order to make modifications
+							</button>
+							<span id="stateSpinner1" class="spinnerSmall" style="display:none"></span>
+							<br />
+							<button type="button" class="btn btn-primary m-0 " @onclick=Archive disabled="@disableStateButton">
+								Order has been entered into Fortnox
+							</button>
+							<span id="stateSpinner2" class="spinnerSmall" style="display:none"></span>
+						</div>
+						<br />
+						break;
+					case FormModel.ORDER_ACTIONED:
+						<h3>Order filed</h3>
+						<p>
+							The order has been entered into Fortnox and can no longer be edited.
+						</p>
+						break;
+					default:
+						break;
+				}
+				<select class=" " id="showSection" onChange="ShowOnlySelectedSection(this)">
+					<option selected hidden>Select section</option>
+					<option value="all">Show all</option>
+					@foreach (var item in sectionChoices) {
+						<option value="@("S_"+item.Key)">@item.Value</option>
+					}
+				</select>
+				<br />
+				<OrderSummary Model="@model" />
+			</div>
+		</div>
+	</EditForm>
+}
+<dialog id="discardFormConfirm">
+	<h3>Closing unsaved form</h3>
+	Do you wish to discard any unsaved changes to the current order?
+	<form method="dialog" class="w-100">
+		<span class="@Css_dialogForm">
+			<button class="@Css_dialogBtn btn-danger" type="submit" id="discardForm" @onclick="() => DialogClose(DIA_Open_Discard)">Discard and close</button>
+			<button class="@Css_dialogBtn btn-secondary" type="submit" id="discardCancel" @onclick="() => DialogClose(DIA_Open_Reopen)">Cancel</button>
+			<button class="@Css_dialogBtn btn-primary" type="submit" id="saveClose" @onclick="() => DialogClose(DIA_Open_Save)">Save and close</button>
+		</span>
+	</form>
+</dialog>
+<dialog id="orderBusy">
+	<h3>That order is in use by someone else</h3>
+	What would you like to do?
+	<form method="dialog" class="w-100" >
+		<span class="@Css_dialogForm">
+			<button class="@Css_dialogBtn btn-secondary" type="submit" id="orderBusyNew" @onclick="() => DialogClose(DIA_Busy_New)">New order</button>
+			<button class="@Css_dialogBtn btn-secondary" type="submit" id="orderBusyLoad" @onclick="() => DialogClose(DIA_Busy_Load)">Load order</button>
+		</span>
+	</form>
+</dialog>

@@ -1,0 +1,74 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@using BlazorDateRangePicker
+@inherits FieldComponent<Person>
+
+@if (_condValid) {
+	<fieldset class="@Css_multifield fieldComponent personField" id="@HtmlId" name="@(AccessName??DisplayName)">
+		<FieldLegend HtmlId=@HtmlId DisplayName=@DisplayName Description=@Config.Description HasDependants=@hasDependants Dependants=@dependantFields Collapsable=true />
+
+		@if (!Model.IsReadOnly) {
+			<ValidationMessage For="ValueExpression" />
+		}
+		<div id="@(HtmlId+hid_compContent)">
+			@if (Model.IsReadOnly) {
+				List<(string name, string id, string value)> infoFields = new();
+				if (FirstName != null || LastName != null) {
+					infoFields.Add(("Name", HtmlId + hid_persFname, string.Join(' ', FirstName, LastName)));
+				}
+				if (BirthDate != null) {
+					infoFields.Add(("Birthdate", HtmlId + hid_persBdate, BirthDate!.Start.DateTime.ToLongDateString()));
+				}
+				if (PhoneNumber != null) {
+					infoFields.Add(("Phonenumber", HtmlId + hid_persPhone, PhoneNumber));
+				}
+				if (Email != null) {
+					infoFields.Add(("Email", HtmlId + hid_persEmail, Email));
+				}
+				if (WorkAddress != null) {
+					infoFields.Add(("Work address ", HtmlId + hid_persWaddr, WorkAddress.ToString(Model.GetRegion(WorkAddress.CountryCode!)?.name)));
+				}
+				if (HomeAddress != null) {
+					infoFields.Add(("Home address ", HtmlId + hid_persHaddr, HomeAddress.ToString(Model.GetRegion(HomeAddress.CountryCode!)?.name)));
+				}
+
+				@foreach (var item in infoFields) {
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@item.id>@item.name</label></span>
+						<span class=@Css_fieldInput id=@item.id>@item.value</span>
+					</span>
+				}
+			}
+			else if (_depValid) {
+				@if (flags[0] == 'y') {
+					var id = HtmlId + hid_persFname;
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@id>First name</label></span>
+						<input class=@Css_fieldInput type="text" @bind-value="FirstName" id=@id />
+					</span>
+				}
+				@if (flags[1] == 'y') {
+					var id = HtmlId + hid_persLname;
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@id>Last name</label></span>
+						<input class=@Css_fieldInput type="text" @bind-value="LastName" id=@id />
+					</span>
+				}
+				@if (flags[2] == 'y') {
+					<DateField @ref="dateRef" Config="birthConfig" @bind-Value="BirthDate" HtmlId="@(HtmlId+hid_persBdate)" Model=@Model />
+				}
+				@if (flags[3] == 'y') {
+					<TextField @ref="phoneRef" Config="phoneConfig" @bind-Value="PhoneNumber" HtmlId="@(HtmlId+hid_persPhone)" Model=@Model CountryCode=@CountryCode />
+				}
+				@if (flags[4] == 'y') {
+					<TextField @ref="emailRef" Config="emailConfig" @bind-Value="Email" HtmlId="@(HtmlId+hid_persEmail)" Model=@Model />
+				}
+				@if (flags[5] == 'y') {
+					<AddressField @ref="workRef" Config="workConfig" @bind-Value="WorkAddress" HtmlId="@(HtmlId+hid_persWaddr)" Model=@Model CountryCode=@CountryCode />
+				}
+				@if (flags[6] == 'y') {
+					<AddressField @ref="homeRef" Config="homeConfig" @bind-Value="HomeAddress" HtmlId="@(HtmlId+hid_persHaddr)" Model=@Model CountryCode=@CountryCode />
+				}
+			}
+		</div>
+	</fieldset>
+}

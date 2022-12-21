@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Components
+@using OrderForm.Data
+@using OrderForm.Pages
+@using static OrderForm.Data.FormConfig.SectionConfig
+@using static OrderForm.Data.FormConfig
+@using static OrderForm.Data.FieldOptionStrings
+
+<fieldset class=@(Css_formSection + (Active ? isValid ? Css_req_valid : Css_opt_inValid : "")) id="@HtmlId" style="display:block">
+	@if (Active) {
+		<legend class="fs-2">
+			<a id="@(HtmlId+hid_compLinkTarget)">@Name </a>
+			<span class="hideField iconButton fs-5 " onclick="ToggleChildrenAndTarget(this, '@(HtmlId+hid_compContent)')">
+				<i class="bi bi-plus-square" style="display:none"></i><i class="bi bi-dash-square-fill"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+			</span>
+		</legend>
+
+		<div id="@(HtmlId+hid_compContent)" >
+			@{
+				//bool wasValid = isValid;
+				//isValid = true;
+				foreach (var set in fieldSets) {
+					if (set.conditionValid) {
+						
+						<fieldset class="@set.htmlClasses">
+							@if (set.header != string.Empty) {
+								<legend class="fs-4">
+									@set.header
+									@if (fieldSets.Count > 1) {
+										<span class="hideField iconButton fs-5 " onclick="ToggleChildrenAndTarget(this, '@set.htmlId')">
+											<i class="bi bi-plus-square" style="display:none"></i><i class="bi bi-dash-square-fill"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+										</span>
+									}
+								</legend>
+							}
+							<div id="@set.htmlId">
+								@foreach (var field in set.fields.Values) {
+									<DynamicComponent Type="field.type" Parameters="field.props" />
+								}
+							</div>
+						</fieldset>
+						<br />
+					}
+				}
+				//if(wasValid != isValid) {
+				//	StateHasChanged();
+				//}
+			}
+		</div>
+	}
+	else {
+		<legend class="fs-2">
+			<a id="@(HtmlId+hid_compLinkTarget)">@Name </a>
+			<span class="hideField iconButton fs-5" onclick="ToggleChildrenAndTarget(this, null)"><i class="bi bi-file-earmark-plus" @onclick="Activate"></i><span class="spinnerSmall" style="display:none"></span></span>
+		</legend>
+	}
+</fieldset>

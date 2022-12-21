@@ -1,0 +1,22 @@
+﻿@namespace OrderForm.Form.Ext
+@using static OrderForm.Data.FieldOptionStrings
+@using static OrderForm.Data.FormConfig.SectionConfig.FieldConfig
+
+<span class=@Css_fieldName>
+	<label for="@HtmlId"><a id="@(HtmlId+hid_compLinkTarget)">@DisplayName</a></label>
+	@if (HasDescription) {
+		<span class="fieldHelp iconButton ps-0 pe-1 " onclick="ToggleChildrenAndTarget(this, '@(HtmlId+hid_compDescription)')">
+			<i class="bi bi-patch-question"></i><i class="bi bi-patch-question-fill" style="display:none"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+		</span>
+	}
+</span>
+
+@code {
+	[Parameter]
+	public string HtmlId { get; set; }
+	[Parameter]
+	public string DisplayName { get; set; }
+	[Parameter]
+	public bool HasDescription { get; set; }
+
+}

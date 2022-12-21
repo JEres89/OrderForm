@@ -1,0 +1,53 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@inherits FieldComponent<string>
+
+@if (_condValid) {
+	<div class="fieldComponent textField">
+		<span class=@Css_fieldRow>
+			@{
+				bool hasDescription = Config.Description != null && !Config.Description.StartsWith('!');
+			}
+			<FieldLabel HtmlId=@HtmlId DisplayName=@DisplayName HasDescription=@hasDescription />
+
+			@if (Model.IsReadOnly) {
+				@if (Config.InputType == FieldTypes.Multiline) {
+					<textarea class=@Css_fieldInput id="@HtmlId" readonly=@true >@Value</textarea>
+				}
+				else {
+					<span class=@Css_fieldInput id="@HtmlId" >@Value</span>
+				}
+			}
+			else if (_depValid) {
+				@if (Config.InputType == FieldTypes.Multiline) {
+					<textarea class=@Css_fieldInput @bind="inputValue" id="@HtmlId" name="@(AccessName??DisplayName)" rows="3" cols="50" placeholder="@Placeholder" />
+				}
+				else {
+					<input class=@Css_fieldInput type="@htmlType" @bind="inputValue" id="@HtmlId" name="@(AccessName??DisplayName)" filterPattern="@filterPattern" placeholder="@Placeholder" />
+				}
+			}
+		</span>
+		@*@switch (Config.InputType) {
+	case FieldTypes.Text:
+	<input type="text" @bind="textValue" id="@HtmlId" name="@Config.Name" />
+	break;
+	case FieldTypes.Email:
+	<input type="email" @bind="emailValue" @oninput="@((ChangeEventArgs e) => emailValue = e.Value?.ToString()??"")" id="@HtmlId" name="@Config.Name" />
+	break;
+	case FieldTypes.Phone:
+	<input type="tel" @bind="phoneValue" @oninput="@((ChangeEventArgs e) => phoneValue = e.Value?.ToString()??"")" id="@HtmlId" name="@Config.Name" />
+	break;
+	case FieldTypes.Url:
+	<input type="url" @bind="urlValue" id="@HtmlId" name="@Config.Name" />
+	break;
+	case FieldTypes.Multiline:
+	<textarea @bind="textValue" id="@HtmlId" name="@Config.Name" rows="3" cols="50" />
+	break;
+	}*@
+		@if (!Model.IsReadOnly) {
+			<ValidationMessage For="ValueExpression" />
+		}
+		@if (Config.Description != null) {
+			<FieldDescription HtmlId=@HtmlId Description=@Config.Description HasDescription=@hasDescription />
+		}
+	</div>
+}

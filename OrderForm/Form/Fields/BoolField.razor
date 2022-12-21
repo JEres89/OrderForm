@@ -1,0 +1,25 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@inherits FieldComponent<bool>
+
+@if (_condValid) {
+	<div class="fieldComponent boolField">
+		<span class=@Css_fieldRow>
+			@{
+				bool hasDescription = Config.Description != null && !Config.Description.StartsWith('!');
+			}
+			<FieldLabel HtmlId=@HtmlId DisplayName=@DisplayName HasDescription=@hasDescription />
+
+			@if (Model.IsReadOnly) {
+				<input class=@Css_checkField type="checkbox" checked=@CurrentValue disabled="disabled" id="@HtmlId" name="@(AccessName??DisplayName)" />
+			}
+			else if (_depValid) {
+				<input class=@Css_checkField type="checkbox" @bind="CurrentValue" id="@HtmlId" name="@(AccessName??DisplayName)" />
+			}
+		</span>
+		<ValidationMessage For="ValueExpression" />
+
+		@if (Config.Description != null) {
+			<FieldDescription HtmlId=@HtmlId Description=@Config.Description HasDescription=@hasDescription />
+		}
+	</div>
+}

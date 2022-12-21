@@ -1,0 +1,61 @@
+﻿@namespace OrderForm.Form.Ext
+@using static OrderForm.Data.FieldOptionStrings
+@using static OrderForm.Data.FormConfig.SectionConfig.FieldConfig
+
+<legend class=@Css_fieldLegend>
+	<a id="@(HtmlId+hid_compLinkTarget)">@DisplayName </a>
+	@if (hasDescription) {
+		<span class="fieldHelp iconButton ps-1 pe-0 " onclick="ToggleChildrenAndTarget(this, '@(HtmlId+hid_compDescription)')">
+			<i class="bi bi-patch-question"></i><i class="bi bi-patch-question-fill" style="display:none"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+		</span>
+	}
+	@if (HasDependants) {
+		<span class="fieldDep iconButton" onclick="ToggleChildrenAndTarget(this, '@(HtmlId+hid_compDepend)')">
+			<i class="bi bi-exclamation-triangle"></i><i class="bi bi-exclamation-triangle-fill" style="display:none"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+		</span>
+	}
+	@if (Collapsable) {
+		<span class="hideField iconButton" onclick="ToggleChildrenAndTarget(this, '@(HtmlId+hid_compContent)')">
+			<i class="bi bi-plus-square" style="display:none"></i><i class="bi bi-dash-square-fill"></i> @*needs to be on one line or the hidden element will be replaced by whitespace*@
+		</span>
+	}
+</legend>
+
+@if (Description != null) {
+	<FieldDescription HtmlId=@HtmlId Description=@Description HasDescription=@hasDescription />
+}
+
+@if (HasDependants) {
+	<div id="@(HtmlId+hid_compDepend)" class=@Css_dependants style="display:none">
+		@for (int i = 0; i < Dependants.Count; i++) {
+			var item = Dependants[i];
+			bool hasNext = (i >= 0 && i + 1 < Dependants.Count);
+			<span class="@(item.required ? "dep_req":"dep_opt")" onclick="FocusOnElementId(@item.id[2], '@item.id')" >' @item.name '</span>
+			@(hasNext ? ", " : " ");
+		}
+		requires this field.
+	</div>
+}
+
+@code {
+
+	[Parameter]
+	public string HtmlId { get; set; }
+	[Parameter]
+	public string DisplayName { get; set; }
+	[Parameter]
+	public string Description { get; set; }
+	private bool hasDescription;
+	[Parameter]
+	public bool HasDependants { get; set; }
+	[Parameter]
+	public bool Collapsable { get; set; }
+	[Parameter]
+	public List<(string name, string id, bool required)> Dependants { get; set; }
+
+	protected override void OnParametersSet() {
+		base.OnParametersSet();
+
+		hasDescription = Description != null && !Description.StartsWith('!');
+	}
+}

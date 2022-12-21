@@ -1,0 +1,94 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@inherits FieldComponent<string[]>
+
+@if (_condValid) {
+	<fieldset class="@Css_fieldSet fieldComponent choiceField">
+		<FieldLegend HtmlId=@HtmlId DisplayName=@DisplayName Description=@Config.Description HasDependants=@hasDependants Dependants=@dependantFields Collapsable=@((asDropDown & maxChoices > 1) || (!asDropDown & Choices.Length > 4)) />
+
+		<div id="@(HtmlId+hid_compContent)">
+			@if (Model.IsReadOnly) {
+				<span class=@Css_fieldRow id="@(HtmlId+hid_choiSelected)">
+					<span class=@Css_fieldName>Selected</span>
+					<span class=@Css_fieldInput id="@HtmlId">
+						@{
+							var valstring = "";
+							foreach (var selid in selectionList) {
+								if (valstring != "") {
+									valstring += '\n';
+								}
+								valstring += Choices[selid];
+							}
+						}
+						@((MarkupString)valstring)
+					</span>
+				</span>
+			}
+			else if (asDropDown) {
+				<label class=@Css_fieldRow id="@selectionHtmlId">
+					<span class=@Css_fieldName>
+						@*@DisplayName*@
+					</span>
+
+					@if (_depValid) {
+						<select class=@Css_fieldInput multiple="@multiple" @onchange="(e) => SelectChangeEvent(e)" style="resize:both" id="@HtmlId" name="@(AccessName??DisplayName)">
+							<option selected="@(selectionList.Count == 0)" disabled="@Required">Select</option>
+							@for (int i = 0; i < Choices.Length; i++) {
+								int id = i;
+								var choice = Choices[id];
+								var isSelected = selectionList.Contains(id);
+								var isDisabled = maxChoices == 1 || isSelected ? false : selectionList.Count < maxChoices ? false : true;
+
+								<option value="@id" selected="@isSelected" disabled="@isDisabled">@choice</option>
+							}
+						</select>
+					}
+
+				</label>
+				<ValidationMessage For="ValueExpression" />
+				@if (maxChoices > 1) {
+					<label id="@(HtmlId+hid_choiSelected)">
+						<span class="@Css_fieldName w-auto">Selected (maximum of @maxChoices):</span>
+						<br />
+						@foreach (var selid in selectionList) {
+							int id = selid;
+							var choice = Choices[selid];
+								<span class="iconButton" @onclick="() => RemoveSelection(id)">
+									<i class="bi bi-trash3"></i>
+									@choice
+								</span>
+							<br />
+						}
+					</label>
+				}
+			}
+			else {
+				<label class=@Css_fieldRow id="@HtmlId" name="@(AccessName??DisplayName)">
+					@{
+						if (_depValid) {
+							var type = maxChoices == 1 ? "radio" : "checkbox";
+							var name = HtmlId + (maxChoices == 1 ? hid_choiRadio : hid_choiCheck);
+
+							for (int i = 0; i < Choices.Length; i++) {
+								int id = i; // reassign value to new variable for 'value="@id"'
+								var choice = Choices[id];
+								var isChecked = selectionList.Contains(id);
+								var isDisabled =
+								maxChoices == 1 ? false :
+								isChecked ? false :
+								selectionList.Count < maxChoices ? false : true;
+								var onchange = maxChoices == 1 ?
+								EventCallback.Factory.Create<ChangeEventArgs>(this, (e) => SelectChangeEvent(e)) :
+								EventCallback.Factory.Create<ChangeEventArgs>(this, (e) => ToggleSelection(id));
+								<label>
+									<input type="@type" name="@name" value="@id" checked="@isChecked" disabled="@isDisabled" @onchange="onchange" />
+									@choice
+								</label>
+							}
+						}
+						<ValidationMessage For="ValueExpression" />
+					}
+				</label>
+			}
+		</div>
+	</fieldset>
+}

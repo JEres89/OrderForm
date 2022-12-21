@@ -1,0 +1,104 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@using OrderForm.Data
+@using static OrderForm._Imports
+@inherits OrderForm.Form.FieldComponent<ProductCategory>
+
+@if (_condValid) {
+	<fieldset class="@Css_multifield fieldComponent productField" id="@HtmlId" name="@(AccessName??DisplayName)">
+		<FieldLegend HtmlId=@HtmlId DisplayName=@DisplayName Description=@Config.Description HasDependants=@hasDependants Dependants=@dependantFields Collapsable=true />
+
+		<div id="@(HtmlId+hid_compContent)">
+			@{
+				var isReadOnly = Model.IsReadOnly;
+				if (!isReadOnly) {
+					<ValidationMessage For="ValueExpression" />
+				}
+				if (isReadOnly || (providedPlan != null && currencyRate != null && _depValid)) {
+					<span class="@Css_productRowHeader ">
+						<span class="@Css_fieldName "></span>
+						<span class="@Css_productInputHeader_sm ">Art.No</span>
+						<span class="@Css_productInputHeader_sm ">Qty #</span>
+						<span class="@Css_productInputHeader ">Price</span>
+						<span class="@Css_productInputHeader ">@providedPlan</span>
+						@if (!isReadOnly) {
+							//<span class="iconButton py-0"><i class="bi bi-plus-slash-minus"></i></span>
+							<i class="iconButton btn py-0 bi bi-plus-slash-minus"></i>
+						}
+					</span>
+
+					@foreach (var i in Value!.Products) {
+						var product = products![i];
+						var id = productHtmlIds[product.ArticleId];
+						var currentstate = GetSelected(product.ArticleId);
+
+						if (!isReadOnly || (isReadOnly && currentstate != null)) {
+							var hasFixedPlan = product.Plan != PLAN_RECURRING;
+							var plan = hasFixedPlan ? product.Plan : providedPlan;
+							var planFactor = hasFixedPlan ? Model.GetPlanFactor(plan) : (decimal)this.planFactor!;
+
+							var hasFixedPrice = product.Price != null;
+							decimal price = hasFixedPrice ? (decimal)(product.Price! / currencyRate!) :
+							(product.Plan == PLAN_FREE ? 0 : (currentstate?.price / currencyRate) ?? 0);
+							var subtotal = (currentstate?.quantity ?? 0) * price * planFactor;
+							var subtotalString = Model.ConvertToCurrencyString(subtotal) @*+ " " + currencySymbol*@;
+
+							<span class="@Css_productRow ">
+								<span class="@Css_fieldName ">
+									<label for="@(id+(product.Single ? hid_prodPrice : hid_prodQuantity))">@product.Name</label>
+								</span>
+								<input class="@Css_productInput_sm " type="text" value="@product.ArticleId" readonly />
+								@if (!isReadOnly) {
+									if (!product.Single) {
+										<input class="@Css_productInput_sm " id="@(id+hid_prodQuantity)" type="number" value="@(currentstate?.quantity)" onchange="@((ChangeEventArgs e) => SetSelectedQuantity(product.ArticleId, hasFixedPrice, e))" />
+									}
+									else {
+										<span class="productInput-sm "></span>
+									}
+									if (hasFixedPrice) {
+										<input class="@Css_productInput " type="text" value="@Model.ConvertToCurrencyString((Decimal)price)" readonly />
+									}
+									else if (hasFixedPlan && product.Plan == PLAN_FREE) {
+										<input class="@Css_productInput " type="text" value="@product.Plan" disabled readonly />
+									}
+									else {
+										<input class="@Css_productInput " id="@(id+hid_prodPrice+"_text")" type="text" value="@Model.ConvertToCurrencyString(price)" onclick="ToggleThisAndTarget(this, '@(id+hid_prodPrice)')" />
+										<input class="@Css_productInput " id="@(id+hid_prodPrice)" type="number" value="@price" onchange="@((ChangeEventArgs e) => SetSelectedPrice(product.ArticleId, e))" style="display:none" onblur="ToggleThisAndTarget(this, '@(id+hid_prodPrice+"_text")', false)" onfocus="this.select()" />
+									}
+									if (currentstate != null && subtotal == 0 && product.Plan != PLAN_FREE) {
+										<span class="@Css_productInput @Css_req_inValid" readonly title="Price is 0 but product is not Free!"><i class="bi bi-exclamation-triangle-fill"></i></span>
+									}
+									else {
+										<input class="@Css_productInput " type="text" value="@subtotalString" readonly />
+									}
+									if (currentstate != null) {
+										//<span class="iconButton btn py-0 " @onclick="() => SetSelected(product.ArticleId, null, null, false)">
+										//	<i class="bi bi-trash3"></i>
+										//</span>
+										<i class="iconButton btn py-0 bi bi-trash3" @onclick="() => SetSelected(product.ArticleId, null, null, false)"></i>
+
+									}
+									else {
+										//<span class="iconButton btn py-0" @onclick="() => SetSelected(product.ArticleId, 1, null, hasFixedPrice)">
+										//	<i class="bi bi-plus-circle"></i>
+										//</span>
+										<i class="iconButton btn py-0 bi bi-plus-circle" @onclick="() => SetSelected(product.ArticleId, 1, null, hasFixedPrice)"></i>
+									}
+								}
+								else {
+									if (!product.Single) {
+										<span class="@Css_productInput_sm " id="@(id+hid_prodQuantity)" type="number">@(currentstate?.quantity)</span>
+									}
+									else {
+										<span class="productInput-sm "></span>
+									}
+									<span class="@Css_productInput">@Model.ConvertToCurrencyString((Decimal)price)</span>
+									<span class="@Css_productInput">@subtotalString</span>
+								}
+							</span>
+						}
+					}
+				}
+			}
+		</div>
+	</fieldset>
+}

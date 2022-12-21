@@ -1,0 +1,72 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@inherits FieldComponent<Address>
+
+@if (_condValid) {
+	<fieldset id="@HtmlId" class="@Css_multifield fieldComponent multiFieldComponent addressField" name="@(AccessName??DisplayName)">
+		<FieldLegend HtmlId=@HtmlId DisplayName=@DisplayName Description=@Config.Description HasDependants=@hasDependants Dependants=@dependantFields Collapsable=true />
+
+		<div id="@(HtmlId+hid_compContent)">
+			@if (Model.IsReadOnly) {
+				var countryHtmlId = HtmlId + hid_addrCountry;
+				var streetId = HtmlId + hid_addrStreet;
+				var cityId = HtmlId + hid_addrCity;
+				var postcodeId = HtmlId + hid_addrPostCode;
+				<span class=@Css_fieldRow>
+					<span class=@Css_fieldName><label for=@countryHtmlId>Country</label></span>
+					<span class=@Css_fieldInput id=@countryHtmlId>@_country?.name</span>
+				</span>
+				@if (isFullAddress) {
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@streetId>Street</label></span>
+						<span class=@Css_fieldInput id=@streetId>@Street</span>
+					</span>
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@cityId>City</label></span>
+						<span class=@Css_fieldInput id=@cityId>@City</span>
+					</span>
+					<span class=@Css_fieldRow>
+						<span class=@Css_fieldName><label for=@postcodeId>Postcode</label></span>
+						<span class=@Css_fieldInput id=@postcodeId>@PostCode</span>
+					</span>
+				}
+			}
+			else {
+				<ValidationMessage For="ValueExpression" />
+				if (_depValid) {
+					var countryHtmlId = HtmlId + hid_addrCountry;
+					<span class=@Css_fieldRow>
+						<label class=@Css_fieldName for=@countryHtmlId>Country</label>
+						@if (!useOrderCountry) {
+							<select class="@Css_fieldInput col-sm-5" @bind="_countryCode" id=@countryHtmlId>
+								<option selected="@(_countryCode==null)" disabled="@Required">Select country</option>
+								@foreach (var country in CountryList!) {
+									<option value=@country.Key>@(country.Value.name + (country.Value.nativeName != "" ? (" / " + country.Value.nativeName) : ""))</option>
+								}
+							</select>
+						}
+						else {
+							<span class=@Css_fieldInput>@_country?.name</span>
+						}
+					</span>
+					@if (isFullAddress & _country != null) {
+						var streetId = HtmlId + hid_addrStreet;
+						<span class=@Css_fieldRow>
+							<span class=@Css_fieldName><label for=@streetId>Street</label></span>
+							<input class=@Css_fieldInput type="text" @bind-value="Street" id=@streetId />
+						</span>
+						var cityId = HtmlId + hid_addrCity;
+						<span class=@Css_fieldRow>
+							<span class=@Css_fieldName><label for=@cityId>City</label></span>
+							<input class=@Css_fieldInput type="text" @bind-value="City" id=@cityId />
+						</span>
+						var postcodeId = HtmlId + hid_addrPostCode;
+						<span class=@Css_fieldRow>
+							<span class=@Css_fieldName><label for=@postcodeId>Post code</label></span>
+							<input class=@Css_fieldInput type="text" @bind-value="PostCode" id=@postcodeId />
+						</span>
+					}
+				}
+			}
+		</div>
+	</fieldset>
+}

@@ -1,0 +1,51 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+@inherits FieldComponent<decimal>
+
+@if (_condValid) {
+	/*@if (asInlineField) {
+		@if (Config.InputType == Data.FieldTypes.Number) {
+			<input class=@Css_fieldInput type="number" @bind="numberValue" id="@HtmlId" name="@(AccessName??DisplayName)" />
+		}
+		else {
+			<input class=@Css_fieldInput type="number" @bind="currencyValue" id="@HtmlId" name="@(AccessName??DisplayName)" />
+		}
+	}
+	else {*/
+	<div class="fieldComponent numberField">
+		<span class=@Css_fieldRow>
+			@{
+				bool hasDescription = Config.Description != null && !Config.Description.StartsWith('!');
+			}
+			<FieldLabel HtmlId=@HtmlId DisplayName=@DisplayName HasDescription=@hasDescription />
+
+			@if (Model.IsReadOnly) {
+				bool isCurrency = Config.InputType != Data.FieldTypes.Number;
+				<span class=@(isCurrency ? Css_productInput : Css_fieldInput) id="@HtmlId">
+					@(isCurrency ? (Model.ConvertToCurrencyString(currencyValue ?? 0) + " " + currency) : numberValue)
+				</span>
+			}
+			else if (_depValid) {
+				@if (Config.InputType == Data.FieldTypes.Number) {
+					<input class=@Css_fieldInput type="number" @bind="numberValue" id="@HtmlId" name="@(AccessName??DisplayName)" step="1" />
+				}
+				else if (Config.InputType == Data.FieldTypes.Price) {
+					@*<input class=@Css_fieldInput type="number" @bind="currencyValue" id="@HtmlId" name="@(AccessName??DisplayName)" />*@
+
+					<input class="@Css_productInput " id="@(HtmlId+"_text")" type="text" value="@(Model.ConvertToCurrencyString(currencyValue??0) + " " + currency)" onclick="ToggleThisAndTarget(this, '@HtmlId')" />
+					<input class="@Css_productInput " id="@HtmlId" type="number" @bind="currencyValue" style="display:none" onblur="ToggleThisAndTarget(this, '@(HtmlId+"_text")', false)" onfocus="this.select()" step="1" />
+				}
+				else {
+					<input class="@Css_productInput " type="text" value=@(Model.ConvertToCurrencyString(currencyValue??0) + " " + currency) id="@HtmlId" name="@(AccessName??DisplayName)" readonly />
+				}
+			}
+		</span>
+		@if (!Model.IsReadOnly) {
+			<ValidationMessage For="ValueExpression" />
+		}
+
+		@if (Config.Description != null) {
+			<FieldDescription HtmlId=@HtmlId Description=@Config.Description HasDescription=@hasDescription />
+		}
+	</div>
+	//}
+}

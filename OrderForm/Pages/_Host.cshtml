@@ -1,0 +1,10 @@
+﻿@page "/"
+@namespace OrderForm.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+	
+	Layout = "_Layout";
+}
+<script src="_content/BlazorDateRangePicker/clickAndPositionHandler.js"></script>
+<link rel="stylesheet" href="_content/BlazorDateRangePicker/daterangepicker.min.css" />
+<component type="typeof(App)" render-mode="ServerPrerendered" />

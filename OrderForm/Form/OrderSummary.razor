@@ -1,0 +1,103 @@
+﻿@using static OrderForm.Data.FieldOptionStrings
+
+<br />
+<fieldset class=@Css_summary>
+	<legend class=@Css_fieldLegend>
+		OrderSummary
+	</legend>
+	@foreach (var item in fieldValues) {
+		var id = item.Key.Id;
+		<div class="">
+			<h5>@item.Key.Name</h5>
+			@foreach (var field in item.Value) {
+				string text = ConvertFieldValueToString(field.Value);
+				if (text != string.Empty) {
+					<div class="d-flex justify-content-between">
+						<span onclick="FocusOnElementId(@id,'@(field.Key + hid_compLinkTarget)')">@(field.Value.Item2.DisplayName + ": ")</span>&nbsp;<span>@text</span>
+					</div>
+				}
+			}
+		</div>
+	}
+	@if (groupValues.Count > 0 && (yearlyOrderSum != 0 || oneOffOrderSum != 0)) {
+		<br />
+		<div>
+			<h5>Order Summary</h5>
+			<table>
+				@foreach (var item in groupValues.Values) {
+					if (item.FieldIds.Count == 0 @*|| (item.YearTotal == 0 && item.OnceTotal == 0)*@ ) {
+						continue;
+					}
+					var group = item;
+					string altText = string.Empty;
+					bool hasNonYearPlan = false;
+					foreach (var planTotal in group.SubTotals) {
+						string planName;
+
+						switch (planTotal.Key) {
+							case PLAN_YEARLY:
+								planName = PLAN_YEARLY;
+								break;
+							case PLAN_RECURRING:
+								planName = orderInvoicePlan;
+								hasNonYearPlan = true;
+								break;
+							case PLAN_ONCE:
+								planName = PLAN_ONCE;
+								hasNonYearPlan = true;
+								break;
+							case PLAN_FREE:
+								planName = PLAN_FREE;
+								hasNonYearPlan = true;
+								break;
+							case PLAN_DISCOUNT:
+								planName = orderInvoicePlan + ' ' + planTotal.Key;
+								break;
+							default:
+								planName = "";
+								break;
+						}
+
+						if (altText != string.Empty) {
+							altText += " \n";
+						}
+						altText += (planName + ": " + Model.ConvertToCurrencyString(planTotal.Value/orderCurrencyRate));
+					}
+					if (!hasNonYearPlan) {
+						altText = string.Empty;
+					}
+					@*var focusElement = group.Focus;*@
+					// Todo: Currently only supports 10 activeSections (single char id 0-9).
+					// Refactor this to parse the first continous sequence of numbers
+					// to support more than 10 activeSections.
+					@*var focusSection = (int)Char.GetNumericValue(focusElement.First(c => Char.IsNumber(c)));
+					group.NextFocus();
+					onclick = "FocusOnElementId(@focusSection,'@(focusElement + hid_compLinkTarget)')"*@
+					if (group.YearTotal != 0) {
+						<tr>
+							<td title="Yearly total"><i class="bi bi-info-circle"></i>@(group.ProductGroup + (group.OnceTotal != 0 ? " (recurring)" : ""))</td>
+							<td title="@((MarkupString)altText)" class="text-end">@Model.ConvertToCurrencyString(group.YearTotal/orderCurrencyRate)</td>
+						</tr>
+					}
+					if (group.OnceTotal != 0) {
+						<tr>
+							<td title="Once total"><i class="bi bi-info-circle"></i>@(group.ProductGroup + (group.YearTotal != 0 ? " (One-off)" : ""))</td>
+							<td class="text-end">@Model.ConvertToCurrencyString(group.OnceTotal/orderCurrencyRate)</td>
+						</tr>
+					}
+				}
+				<tr><td>-</td><td>-</td></tr>
+				<tr>
+					<td>Yearly total</td>
+					<td class="text-end">@Model.ConvertToCurrencyString(yearlyOrderSum/orderCurrencyRate) @orderCurrency</td>
+				</tr>
+				<tr>
+					<td>One-off total</td>
+					<td class="text-end">@Model.ConvertToCurrencyString(oneOffOrderSum/orderCurrencyRate) @orderCurrency</td>
+				</tr>
+			</table>
+			<br />
+		</div>
+	}
+
+</fieldset>
