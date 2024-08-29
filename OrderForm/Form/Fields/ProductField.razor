@@ -1,7 +1,7 @@
 ﻿@using static OrderForm.Data.FieldOptionStrings
 @using OrderForm.Data
 @using static OrderForm._Imports
-@inherits OrderForm.Form.FieldComponent<ProductCategory>
+@inherits OrderForm.Form.FieldComponent<ProductCategory?>
 
 @if (_condValid) {
 	<fieldset class="@Css_multifield fieldComponent productField" id="@HtmlId" name="@(AccessName??DisplayName)">

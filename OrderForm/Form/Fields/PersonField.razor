@@ -1,6 +1,6 @@
 ﻿@using static OrderForm.Data.FieldOptionStrings
 @using BlazorDateRangePicker
-@inherits FieldComponent<Person>
+@inherits FieldComponent<Person?>
 
 @if (_condValid) {
 	<fieldset class="@Css_multifield fieldComponent personField" id="@HtmlId" name="@(AccessName??DisplayName)">

@@ -1,0 +1,288 @@
+{
+  "ConfigurationVersion": "DefaultConfiguration_20240828111433",
+  "FormConfig": [
+    {
+      "Id": 0,
+      "Name": "General",
+      "Fields": [
+        {
+          "InputType": 14,
+          "AccessName": null,
+          "DisplayName": "Mandatory Information to Support",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": null
+        },
+        {
+          "InputType": 5,
+          "AccessName": "@ORDER_DATE@",
+          "DisplayName": "Order Date",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 2,
+          "AccessName": null,
+          "DisplayName": "Our Representative",
+          "Description": null,
+          "Placeholder": "First and Last name",
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 2,
+          "AccessName": "@CUSTOMER_NAME@",
+          "DisplayName": "Customer",
+          "Description": null,
+          "Placeholder": "Official company name",
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 11,
+          "AccessName": null,
+          "DisplayName": "Existing customer?",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": {
+            "Choices": "Yes,No"
+          }
+        },
+        {
+          "InputType": 12,
+          "AccessName": null,
+          "DisplayName": "Customer contact",
+          "Description": null,
+          "Placeholder": "Contact person",
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 14,
+          "AccessName": null,
+          "DisplayName": "Optional Information to Support",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": null
+        },
+        {
+          "InputType": 3,
+          "AccessName": null,
+          "DisplayName": "Special instructions for support",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 14,
+          "AccessName": null,
+          "DisplayName": "Mandatory Information to Administration",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": null
+        },
+        {
+          "InputType": 2,
+          "AccessName": null,
+          "DisplayName": "VIES number",
+          "Description": "VIES registered EU VAT/IVA/Org number (EU customers only).\nCheck the <a target=\"\" href=\"https://ec.europa.eu/taxation_customs/vies/\">VIES database</a>. Companies with domestic VAT number only, will be subject to VAT.",
+          "Placeholder": "SE999999999901",
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": null
+        },
+        {
+          "InputType": 11,
+          "AccessName": "@INVOICE_CURRENCY@",
+          "DisplayName": "Currency",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": {
+            "Choices": "EXL:Currencies"
+          }
+        },
+        {
+          "InputType": 11,
+          "AccessName": "@INVOICE_PERIOD@",
+          "DisplayName": "Invoicing Period",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": true,
+          "Constraints": {
+            "Choices": "EXL:Plans",
+            "@DEFAULT@": "0"
+          }
+        },
+        {
+          "InputType": 9,
+          "AccessName": null,
+          "DisplayName": "Invoice/Company Address",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": {
+            "@ORDER_COUNTRY@": "@THIS_STRING@"
+          }
+        },
+        {
+          "InputType": 8,
+          "AccessName": null,
+          "DisplayName": "Invoice Email",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": {
+            "@DEP_CONDITION@": "SnailMail:@FALSE_STRING@"
+          }
+        },
+        {
+          "InputType": 4,
+          "AccessName": "SnailMail",
+          "DisplayName": "Mail invoice",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": null
+        },
+        {
+          "InputType": 12,
+          "AccessName": null,
+          "DisplayName": "Invoice reference person",
+          "Description": null,
+          "Placeholder": null,
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": {
+            "RequiredFlags": "yynnynn"
+          }
+        },
+        {
+          "InputType": 14,
+          "AccessName": null,
+          "DisplayName": "Optional Information to Administration",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": null
+        },
+        {
+          "InputType": 3,
+          "AccessName": null,
+          "DisplayName": "Special instructions to Administration",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": true,
+          "Constraints": null
+        }
+      ]
+    },
+    {
+      "Id": 1,
+      "Name": "Products",
+      "Fields": [
+        {
+          "InputType": 13,
+          "AccessName": "CAT01",
+          "DisplayName": "Category 1 products",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": true,
+          "Constraints": {
+            "Category": "CAT01",
+            "@PRODUCT_GROUP@": "Products"
+          }
+        },
+        {
+          "InputType": 13,
+          "AccessName": "CAT02",
+          "DisplayName": "Category 2 products",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": true,
+          "Constraints": {
+            "Category": "CAT02",
+            "@PRODUCT_GROUP@": "Products"
+          }
+        },
+        {
+          "InputType": 15,
+          "AccessName": "subtotal_Products",
+          "DisplayName": "Total Yearly Product Price",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": {
+            "@DEP_CONDITION@": "CAT01/CAT02"
+          }
+        },
+        {
+          "InputType": 1,
+          "AccessName": "discount_Products",
+          "DisplayName": "Discount",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": true,
+          "Constraints": {
+            "@DEP_CONDITION@": "CAT01/CAT02",
+            "@PRODUCT_GROUP@": "Products",
+            "Negative": "@TRUE_STRING@"
+          }
+        },
+        {
+          "InputType": 14,
+          "AccessName": null,
+          "DisplayName": "Additional Product information",
+          "Description": null,
+          "Placeholder": null,
+          "Required": false,
+          "AsSummary": false,
+          "Constraints": {
+            "@DEP_CONDITION@": "CAT01/CAT02"
+          }
+        },
+        {
+          "InputType": 5,
+          "AccessName": "end_Sub",
+          "DisplayName": "Subscription end-month",
+          "Description": "If day of start-month ≤10: previous month next year. If day of start-month >10, current month next year",
+          "Placeholder": "yyyy-MM",
+          "Required": true,
+          "AsSummary": false,
+          "Constraints": {
+            "@DEP_CONDITION@": "@ORDER_DATE@",
+            "Span": "?355",
+            "@PRODUCT_GROUP@": "Products"
+          }
+        }
+      ]
+    }
+  ]
+}

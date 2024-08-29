@@ -328,6 +328,7 @@ namespace OrderForm.Pages
 			bool isValid = true;
 			//System.Threading.Thread.Sleep(5000);
 			foreach (var section in activeSections) {
+				
 				isValid &= sections[section].IsValid;
 			}
 			return isValid;
@@ -338,11 +339,18 @@ namespace OrderForm.Pages
 		// ToDo: Combine attesting state change methods
 		private void SendToReview() {
 			JSRuntime.InvokeVoidAsync("ToggleDisplay", "stateSpinner1", 0);
-			if (VerifyOrder()) {
+
+			if (orderContext?.Validate() ?? false)
+			{
 				model!.orderState = FormModel.ORDER_REVIEW;
 				SaveOrder();
 				GoToOrder(orderId);
 			}
+			//if (VerifyOrder()) {
+			//	model!.orderState = FormModel.ORDER_REVIEW;
+			//	SaveOrder();
+			//	GoToOrder(orderId);
+			//}
 			else {
 				disableStateButton = true;
 				// show message if order is invalid
