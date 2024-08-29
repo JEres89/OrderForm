@@ -1,5 +1,5 @@
 ﻿@using static OrderForm.Data.FieldOptionStrings
-@inherits FieldComponent<Address>
+@inherits FieldComponent<Address?>
 
 @if (_condValid) {
 	<fieldset id="@HtmlId" class="@Css_multifield fieldComponent multiFieldComponent addressField" name="@(AccessName??DisplayName)">
